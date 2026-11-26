@@ -1,1 +1,425 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MASTER MIND ARTIFICIAL INTELLIGENCE</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #131b33;
+      --panel-2: #192444;
+      --text: #f3f6ff;
+      --muted: #9fb0d9;
+      --accent: #4f8cff;
+      --accent-2: #1ec8a5;
+      --border: rgba(255, 255, 255, 0.12);
+      --user-msg: #23386b;
+      --ai-msg: #16203c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Devanagari", sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      color: #ffffff;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--accent-2);
+    }
+
+    .key-btn {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .key-panel {
+      display: none;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .key-panel.open {
+      display: flex;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="password"],
+    input[type="text"],
+    select,
+    textarea {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-secondary {
+      background: #28365c;
+    }
+
+    .toolbar {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 14px;
+      background: rgba(19, 27, 51, 0.7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chip {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    main {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      max-width: 92%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.55;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: var(--user-msg);
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg.ai {
+      align-self: flex-start;
+      background: var(--ai-msg);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      min-height: 18px;
+    }
+
+    footer {
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      padding: 10px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: sticky;
+      bottom: 0;
+    }
+
+    .composer {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    textarea {
+      min-height: 46px;
+      max-height: 130px;
+      resize: vertical;
+    }
+
+    .hint {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-title">MASTER MIND AI</div>
+      <div class="brand-sub" id="keyBadge">Study &amp; Exam Prep Assistant</div>
+    </div>
+    <button class="key-btn" id="toggleKeyBtn" type="button">🔑 API Key</button>
+  </header>
+
+  <section class="key-panel" id="keyPanel">
+    <div class="hint">अपनी Groq API Key (<code>gsk_...</code>) यहाँ डालें। यह केवल आपके फ़ोन के ब्राउज़र में सुरक्षित सेव रहती है।</div>
+    <div class="key-row">
+      <input type="password" id="apiKeyInput" placeholder="gsk_..." autocomplete="off" />
+      <button class="btn" id="saveKeyBtn" type="button">Save</button>
+      <button class="btn btn-secondary" id="clearKeyBtn" type="button">Clear</button>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <select id="modeSelect" aria-label="Study Mode">
+      <option value="concept">📘 विषय समझाएं (Concept)</option>
+      <option value="notes">📝 छोटे नोट्स (Short Notes)</option>
+      <option value="mcq">❓ बहुविकल्पीय प्रश्न (MCQ Test)</option>
+      <option value="answer">✍️ परीक्षा उत्तर (Exam Answer)</option>
+    </select>
+    <select id="langSelect" aria-label="Language">
+      <option value="Hindi">भाषा: हिंदी</option>
+      <option value="English">Language: English</option>
+      <option value="Bilingual">द्विभाषी (Hindi + English)</option>
+    </select>
+  </section>
+
+  <div class="chips" id="quickChips">
+    <button class="chip" data-prompt="भारतीय संविधान की प्रस्तावना को सरल बिंदुओं में समझाइए।">संविधान प्रस्तावना</button>
+    <button class="chip" data-prompt="सामान्य ज्ञान के 5 महत्वपूर्ण प्रश्न और उत्तर बनाइए।">5 GK प्रश्न</button>
+    <button class="chip" data-prompt="आज के विषय पर 5 बहुविकल्पीय प्रश्न (MCQ) उत्तर सहित दीजिए।">MCQ प्रैक्टिस</button>
+    <button class="chip" data-prompt="किसी भी विषय को जल्दी याद करने के 4 प्रभावी नियम बताइए।">याद करने के नियम</button>
+  </div>
+
+  <main id="chatBox">
+    <div class="msg ai">नमस्ते! मैं <b>MASTER MIND ARTIFICIAL INTELLIGENCE</b> हूँ। पढ़ाई, परीक्षा की तैयारी, नोट्स या अभ्यास प्रश्नों के लिए ऊपर 🔑 से अपनी Groq API Key सेव करें और नीचे अपना प्रश्न लिखें।</div>
+  </main>
+
+  <footer>
+    <div class="status" id="statusText"></div>
+    <div class="composer">
+      <textarea id="promptInput" placeholder="यहाँ अपना प्रश्न या विषय लिखें..."></textarea>
+      <button class="btn" id="sendBtn" type="button">भेजें ➤</button>
+    </div>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "mastermind_groq_api_key_v1";
+    const MODEL_NAME = "llama-3.3-70b-versatile";
+
+    const apiKeyInput = document.getElementById("apiKeyInput");
+    const keyPanel = document.getElementById("keyPanel");
+    const toggleKeyBtn = document.getElementById("toggleKeyBtn");
+    const saveKeyBtn = document.getElementById("saveKeyBtn");
+    const clearKeyBtn = document.getElementById("clearKeyBtn");
+    const keyBadge = document.getElementById("keyBadge");
+    const modeSelect = document.getElementById("modeSelect");
+    const langSelect = document.getElementById("langSelect");
+    const chatBox = document.getElementById("chatBox");
+    const promptInput = document.getElementById("promptInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusText = document.getElementById("statusText");
+    const quickChips = document.getElementById("quickChips");
+
+    const history = [];
+
+    function refreshKeyUI() {
+      const saved = localStorage.getItem(STORAGE_KEY) || "";
+      apiKeyInput.value = saved;
+      if (saved.trim()) {
+        keyBadge.textContent = "API Key Ready • Study & Exam Mode";
+        keyBadge.style.color = "#1ec8a5";
+      } else {
+        keyBadge.textContent = "🔑 API Key डालना बाकी है";
+        keyBadge.style.color = "#ffb86c";
+        keyPanel.classList.add("open");
+      }
+    }
+
+    toggleKeyBtn.addEventListener("click", () => {
+      keyPanel.classList.toggle("open");
+    });
+
+    saveKeyBtn.addEventListener("click", () => {
+      const val = apiKeyInput.value.trim();
+      if (!val) {
+        statusText.textContent = "कृपया वैध Groq API Key (gsk_...) दर्ज करें।";
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY, val);
+      refreshKeyUI();
+      keyPanel.classList.remove("open");
+      statusText.textContent = "API Key सेव हो गई है।";
+    });
+
+    clearKeyBtn.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      refreshKeyUI();
+      statusText.textContent = "API Key हटा दी गई है।";
+    });
+
+    function appendMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return div;
+    }
+
+    function buildSystemPrompt() {
+      const modeMap = {
+        concept: "Explain the topic clearly step by step with simple examples for students.",
+        notes: "Create clean, structured revision notes with bullet points and key terms.",
+        mcq: "Generate clear multiple-choice questions with options A, B, C, D and provide answers with brief explanations at the end.",
+        answer: "Write a well-structured, exam-ready answer with introduction, key points, and conclusion."
+      };
+      const lang = langSelect.value;
+      const modeInstruction = modeMap[modeSelect.value] || modeMap.concept;
+      return `You are MASTER MIND ARTIFICIAL INTELLIGENCE, a helpful study and exam preparation tutor. Preferred output language: ${lang}. ${modeInstruction}`;
+    }
+
+    async function sendPrompt(customText) {
+      const text = (typeof customText === "string" ? customText : promptInput.value).trim();
+      if (!text) return;
+
+      const apiKey = (localStorage.getItem(STORAGE_KEY) || "").trim();
+      if (!apiKey) {
+        keyPanel.classList.add("open");
+        statusText.textContent = "पहले ऊपर 🔑 से अपनी Groq API Key सेव करें।";
+        return;
+      }
+
+      appendMessage("user", text);
+      if (typeof customText !== "string") {
+        promptInput.value = "";
+      }
+
+      history.push({ role: "user", content: text });
+      const trimmedHistory = history.slice(-8);
+
+      sendBtn.disabled = true;
+      statusText.textContent = "MASTER MIND AI उत्तर तैयार कर रहा है...";
+      const aiBubble = appendMessage("ai", "सोच रहा हूँ...");
+
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: MODEL_NAME,
+            temperature: 0.5,
+            messages: [
+              { role: "system", content: buildSystemPrompt() },
+              ...trimmedHistory
+            ]
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error?.message || `HTTP ${res.status}`);
+        }
+
+        const reply = data?.choices?.[0]?.message?.content?.trim() || "कोई उत्तर नहीं मिला।";
+        aiBubble.textContent = reply;
+        history.push({ role: "assistant", content: reply });
+        statusText.textContent = "";
+      } catch (err) {
+        aiBubble.textContent = `त्रुटि: ${err.message}. कृपया अपनी Groq API Key या इंटरनेट कनेक्शन जाँचें।`;
+        statusText.textContent = "जवाब लाने में समस्या आई।";
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener("click", () => sendPrompt());
+    promptInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendPrompt();
+      }
+    });
+
+    quickChips.addEventListener("click", (e) => {
+      const btn = e.target.closest(".chip");
+      if (btn && btn.dataset.prompt) {
+        sendPrompt(btn.dataset.prompt);
+      }
+    });
+
+    refreshKeyUI();
+  </script>
+</body>
+</html>
 
