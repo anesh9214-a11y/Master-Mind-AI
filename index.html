@@ -658,5 +658,333 @@
 
     rec.onend = function () {
       listening = false
+<script>
+(function () {
+  const KEY_STORE = "mastermind_groq_key_fix_v1";
+  const MODEL_STORE = "mastermind_groq_model_fix_v1";
+  const MODELS = [
+    "llama-3.1-8b-instant",
+    "llama-3.3-70b-versatile",
+    "gemma2-9b-it",
+    "mixtral-8x7b-32768"
+  ];
+
+  const keyBtn = document.getElementById("toggleKeyBtn");
+  const keyPanel = document.getElementById("keyPanel");
+  const keyInput = document.getElementById("apiKeyInput");
+  const saveKeyBtn = document.getElementById("saveKeyBtn");
+  const clearKeyBtn = document.getElementById("clearKeyBtn");
+  const keyBadge = document.getElementById("keyBadge");
+  const clearChatBtn = document.getElementById("clearChatBtn");
+  const modeSel = document.getElementById("modeSelect");
+  const langSel = document.getElementById("langSelect");
+  const modelSel = document.getElementById("modelSelect");
+  const chipsBox = document.getElementById("quickChips");
+  const chatBox = document.getElementById("chatBox");
+  const promptInput = document.getElementById("promptInput");
+  const micBtn = document.getElementById("micBtn");
+  const sendBtn = document.getElementById("sendBtn");
+  const statusEl = document.getElementById("statusText");
+
+  const chatHistory = [];
+  let rec = null;
+  let listening = false;
+
+  function setStatus(msg) {
+    if (statusEl) statusEl.textContent = msg || "";
+  }
+
+  function syncKeyState() {
+    const saved = (localStorage.getItem(KEY_STORE) || "").trim();
+    if (keyInput) keyInput.value = saved;
+    if (keyBadge) {
+      if (saved) {
+        keyBadge.textContent = "API Key Ready • Active";
+      } else {
+        keyBadge.textContent = "🔑 API Key डालना बाकी है";
+        if (keyPanel) keyPanel.classList.add("open");
+      }
+    }
+  }
+
+  if (keyBtn && keyPanel) {
+    keyBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      keyPanel.classList.toggle("open");
+      setStatus(keyPanel.classList.contains("open") ? "API Key बॉक्स खुला है।" : "");
+    });
+  }
+
+  if (saveKeyBtn && keyInput) {
+    saveKeyBtn.addEventListener("click", function () {
+      const val = keyInput.value.trim();
+      if (!val) {
+        setStatus("कृपया Groq API Key (gsk_...) लिखें।");
+        return;
+      }
+      localStorage.setItem(KEY_STORE, val);
+      syncKeyState();
+      if (keyPanel) keyPanel.classList.remove("open");
+      setStatus("API Key सेव हो गई है।");
+    });
+  }
+
+  if (clearKeyBtn) {
+    clearKeyBtn.addEventListener("click", function () {
+      localStorage.removeItem(KEY_STORE);
+      syncKeyState();
+      setStatus("API Key हटा दी गई है।");
+    });
+  }
+
+  if (modelSel) {
+    const savedModel = localStorage.getItem(MODEL_STORE);
+    if (savedModel && MODELS.includes(savedModel)) modelSel.value = savedModel;
+    modelSel.addEventListener("change", function () {
+      localStorage.setItem(MODEL_STORE, modelSel.value);
+      setStatus("मॉडल चुना गया: " + modelSel.value);
+    });
+  }
+
+  function addBubble(role, text, showCopy) {
+    if (!chatBox) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "msg-wrap " + role;
+
+    const bubble = document.createElement("div");
+    bubble.className = "msg " + role;
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+
+    if (role === "ai" && showCopy && text) {
+      const bar = document.createElement("div");
+      bar.className = "msg-actions";
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "copy-btn";
+      copyBtn.textContent = "📋 कॉपी करें";
+      copyBtn.addEventListener("click", function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            copyBtn.textContent = "✅ कॉपी हो गया";
+            setTimeout(function () { copyBtn.textContent = "📋 कॉपी करें"; }, 1600);
+          }).catch(function () {
+            setStatus("कॉपी नहीं हो सका।");
+          });
+        }
+      });
+      bar.appendChild(copyBtn);
+      wrap.appendChild(bar);
+    }
+
+    chatBox.appendChild(wrap);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return { wrap, bubble };
+  }
+
+  if (clearChatBtn && chatBox) {
+    clearChatBtn.addEventListener("click", function () {
+      chatHistory.length = 0;
+      chatBox.innerHTML = "";
+      addBubble("ai", "नई चैट तैयार है। अपना प्रश्न लिखें या 🎙️ बोलें।", false);
+      setStatus("");
+    });
+  }
+
+  function initMic() {
+    if (!micBtn) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      micBtn.addEventListener("click", function () {
+        setStatus("इस ब्राउज़र में माइक उपलब्ध नहीं है।");
+      });
+      return;
+    }
+    rec = new SR();
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onstart = function () {
+      listening = true;
+      micBtn.classList.add("listening");
+      setStatus("🎙️ सुन रहा हूँ... बोलें");
+    };
+
+    rec.onresult = function (ev) {
+      let spoken = "";
+      for (let i = 0; i < ev.results.length; i++) {
+        spoken += ev.results[i][0].transcript;
+      }
+      if (promptInput) promptInput.value = spoken;
+    };
+
+    rec.onerror = function () {
+      setStatus("माइक परमिशन जाँचें या टाइप करें।");
+    };
+
+    rec.onend = function () {
+      listening = false;
+      micBtn.classList.remove("listening");
+      if (promptInput && promptInput.value.trim()) {
+        setStatus("आवाज़ लिख गई है, 'भेजें ➤' दबाएं।");
+      }
+    };
+
+    micBtn.addEventListener("click", function () {
+      if (listening && rec) {
+        rec.stop();
+        return;
+      }
+      rec.lang = (langSel && langSel.value === "English") ? "en-IN" : "hi-IN";
+      try {
+        rec.start();
+      } catch (e) {
+        setStatus("माइक चालू नहीं हो सका।");
+      }
+    });
+  }
+
+  function getSystemPrompt() {
+    const mode = modeSel ? modeSel.value : "concept";
+    const lang = langSel ? langSel.value : "Hindi";
+    const rules = {
+      concept: "Explain clearly step by step with simple examples.",
+      notes: "Create clean bullet-point revision notes.",
+      mcq: "Create multiple choice questions with options A, B, C, D and answers at the end.",
+      answer: "Write a clear exam-ready answer with points."
+    };
+    return "You are MASTER MIND ARTIFICIAL INTELLIGENCE, a helpful study tutor. Language: " + lang + ". " + (rules[mode] || rules.concept);
+  }
+
+  async function askGroq(apiKey, modelName, messages) {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey
+      },
+      body: JSON.stringify({
+        model: modelName,
+        temperature: 0.45,
+        messages: messages
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error((data && data.error && data.error.message) || ("HTTP " + res.status));
+    }
+    return ((data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "").trim();
+  }
+
+  async function sendText(custom) {
+    if (listening && rec) rec.stop();
+    const text = (typeof custom === "string" ? custom : (promptInput ? promptInput.value : "")).trim();
+    if (!text) return;
+
+    const apiKey = (localStorage.getItem(KEY_STORE) || "").trim();
+    if (!apiKey) {
+      if (keyPanel) keyPanel.classList.add("open");
+      setStatus("पहले 🔑 API Key खोलकर की सेव करें।");
+      return;
+    }
+
+    addBubble("user", text, false);
+    if (typeof custom !== "string" && promptInput) promptInput.value = "";
+
+    chatHistory.push({ role: "user", content: text });
+    const msgs = [{ role: "system", content: getSystemPrompt() }].concat(chatHistory.slice(-8));
+
+    if (sendBtn) sendBtn.disabled = true;
+    setStatus("MASTER MIND AI जवाब ला रहा है...");
+    const aiItem = addBubble("ai", "सोच रहा हूँ...", false);
+
+    const chosen = modelSel ? modelSel.value : MODELS[0];
+    const queue = [chosen].concat(MODELS.filter(function (m) { return m !== chosen; }));
+
+    let finalAns = "";
+    let lastErr = null;
+
+    for (let i = 0; i < queue.length; i++) {
+      const m = queue[i];
+      try {
+        if (m !== chosen) setStatus("दूसरे मॉडल (" + m + ") से जवाब लाया जा रहा है...");
+        const out = await askGroq(apiKey, m, msgs);
+        if (out) {
+          finalAns = out;
+          if (m !== chosen && modelSel) {
+            modelSel.value = m;
+            localStorage.setItem(MODEL_STORE, m);
+          }
+          break;
+        }
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+
+    if (aiItem && aiItem.bubble) {
+      if (finalAns) {
+        aiItem.bubble.textContent = finalAns;
+        chatHistory.push({ role: "assistant", content: finalAns });
+        if (aiItem.wrap) {
+          const bar = document.createElement("div");
+          bar.className = "msg-actions";
+          const copyBtn = document.createElement("button");
+          copyBtn.type = "button";
+          copyBtn.className = "copy-btn";
+          copyBtn.textContent = "📋 कॉपी करें";
+          copyBtn.addEventListener("click", function () {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(finalAns).then(function () {
+                copyBtn.textContent = "✅ कॉपी हो गया";
+                setTimeout(function () { copyBtn.textContent = "📋 कॉपी करें"; }, 1600);
+              });
+            }
+          });
+          bar.appendChild(copyBtn);
+          aiItem.wrap.appendChild(bar);
+        }
+        setStatus("");
+      } else {
+        aiItem.bubble.textContent = "त्रुटि: " + ((lastErr && lastErr.message) || "जवाब नहीं मिल सका");
+        setStatus("जवाब लाने में समस्या आई।");
+      }
+    }
+
+    if (sendBtn) sendBtn.disabled = false;
+  }
+
+  if (sendBtn) {
+    sendBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      sendText();
+    });
+  }
+
+  if (promptInput) {
+    promptInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendText();
+      }
+    });
+  }
+
+  if (chipsBox) {
+    chipsBox.addEventListener("click", function (e) {
+      const btn = e.target.closest ? e.target.closest(".chip") : null;
+      if (btn && btn.dataset && btn.dataset.prompt) {
+        sendText(btn.dataset.prompt);
+      }
+    });
+  }
+
+  syncKeyState();
+  initMic();
+  if (chatBox && !chatBox.children.length) {
+    addBubble("ai", "नमस्ते! मैं MASTER MIND ARTIFICIAL INTELLIGENCE हूँ। 🔑 से API Key सेव करें और प्रश्न पूछें।", false);
+  }
+})();
+</script>
 
     
