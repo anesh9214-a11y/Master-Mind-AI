@@ -1,23 +1,28 @@
-
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>MASTER MIND ARTIFICIAL INTELLIGENCE</title>
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: #131b33;
-      --panel-2: #192444;
-      --text: #f3f6ff;
-      --muted: #9fb0d9;
-      --accent: #4f8cff;
-      --accent-2: #1ec8a5;
-      --border: rgba(255, 255, 255, 0.12);
-      --user-msg: #23386b;
-      --ai-msg: #16203c;
+      --bg: #eef2ff;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --ink: #0f172a;
+      --muted: #475569;
+      --brand-1: #2563eb;
+      --brand-2: #7c3aed;
+      --brand-3: #ec4899;
+      --mint: #059669;
+      --amber: #d97706;
+      --danger: #dc2626;
+      --line: #dbe4ff;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 8px 24px rgba(37, 99, 235, 0.16);
     }
 
     * {
@@ -25,71 +30,93 @@
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Devanagari", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
     }
 
     body {
       background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
+      color: var(--ink);
       display: flex;
       flex-direction: column;
+      height: 100dvh;
     }
 
     header {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
+      background: linear-gradient(125deg, var(--brand-1), var(--brand-2) 55%, var(--brand-3));
+      color: #ffffff;
       padding: 12px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      position: sticky;
-      top: 0;
+      gap: 8px;
+      box-shadow: var(--shadow-md);
       z-index: 20;
+      flex-shrink: 0;
     }
 
     .brand {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0;
     }
 
     .brand-title {
-      font-size: 0.98rem;
+      font-size: 0.96rem;
       font-weight: 800;
-      letter-spacing: 0.4px;
-      color: #ffffff;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .brand-sub {
-      font-size: 0.75rem;
-      color: var(--accent-2);
+      font-size: 0.72rem;
+      color: #d1fae5;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .header-actions {
       display: flex;
       gap: 6px;
       align-items: center;
+      flex-shrink: 0;
     }
 
-    .key-btn {
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid var(--border);
+    .top-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 0.82rem;
+      padding: 7px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
+      backdrop-filter: blur(6px);
+    }
+
+    .top-btn:active {
+      transform: scale(0.97);
     }
 
     .key-panel {
       display: none;
-      background: var(--panel-2);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 14px;
+      background: #fffbeb;
+      border-bottom: 2px solid #f59e0b;
+      padding: 10px 14px;
       gap: 8px;
       flex-direction: column;
+      flex-shrink: 0;
     }
 
     .key-panel.open {
@@ -102,47 +129,77 @@
     }
 
     input[type="password"],
-    input[type="text"],
     select,
     textarea {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 0.92rem;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 11px;
+      font-size: 0.9rem;
       width: 100%;
     }
 
+    select {
+      font-weight: 700;
+    }
+
     .btn {
-      background: var(--accent);
-      color: #fff;
+      background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+      color: #ffffff;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 10px 14px;
       font-size: 0.9rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     .btn-secondary {
-      background: #28365c;
+      background: #475569;
+      box-shadow: none;
+    }
+
+    .controls-wrap {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex-shrink: 0;
     }
 
     .toolbar {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 14px 8px;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
 
-    .model-bar {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      padding: 0 14px 10px;
+    #modeSelect {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1e3a8a;
+    }
+
+    #langSelect {
+      background: #f5f3ff;
+      border-color: #c4b5fd;
+      color: #4c1d95;
+    }
+
+    #modelSelect {
+      background: #ecfdf5;
+      border-color: #6ee7b7;
+      color: #065f46;
     }
 
     .chips {
@@ -150,20 +207,31 @@
       gap: 8px;
       overflow-x: auto;
       padding: 8px 14px;
-      background: rgba(19, 27, 51, 0.7);
-      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, #e0e7ff, #fae8ff);
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+
+    .chips::-webkit-scrollbar {
+      display: none;
     }
 
     .chip {
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid var(--border);
       border-radius: 999px;
       padding: 6px 12px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
+      border: 1.5px solid transparent;
     }
+
+    .chip:nth-child(1) { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+    .chip:nth-child(2) { background: #d1fae5; color: #047857; border-color: #6ee7b7; }
+    .chip:nth-child(3) { background: #fce7f3; color: #be185d; border-color: #f9a8d4; }
+    .chip:nth-child(4) { background: #fef3c7; color: #b45309; border-color: #fcd34d; }
 
     main {
       flex: 1;
@@ -172,6 +240,7 @@
       flex-direction: column;
       gap: 12px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .msg-wrap {
@@ -191,22 +260,27 @@
 
     .msg {
       padding: 12px 14px;
-      border-radius: 14px;
-      line-height: 1.6;
-      font-size: 0.95rem;
+      border-radius: 16px;
+      line-height: 1.62;
+      font-size: 0.94rem;
       white-space: pre-wrap;
       word-wrap: break-word;
     }
 
     .msg.user {
-      background: var(--user-msg);
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #ffffff;
       border-bottom-right-radius: 4px;
+      box-shadow: var(--shadow-sm);
     }
 
     .msg.ai {
-      background: var(--ai-msg);
-      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink);
+      border: 1.5px solid #c7d2fe;
+      border-left: 4px solid #7c3aed;
       border-bottom-left-radius: 4px;
+      box-shadow: var(--shadow-sm);
     }
 
     .msg-actions {
@@ -216,32 +290,34 @@
       padding-left: 2px;
     }
 
-    .copy-btn {
-      background: var(--panel-2);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 4px 10px;
+    .action-chip {
+      background: var(--surface);
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+      border-radius: 9px;
+      padding: 5px 10px;
       font-size: 0.76rem;
+      font-weight: 700;
       cursor: pointer;
     }
 
     .status {
-      font-size: 0.8rem;
-      color: var(--muted);
+      font-size: 0.78rem;
+      color: #4338ca;
+      font-weight: 700;
       text-align: center;
       min-height: 18px;
     }
 
     footer {
-      background: var(--panel);
-      border-top: 1px solid var(--border);
-      padding: 10px 14px 14px;
+      background: var(--surface);
+      border-top: 1.5px solid var(--line);
+      padding: 8px 14px 12px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      position: sticky;
-      bottom: 0;
+      gap: 6px;
+      box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+      flex-shrink: 0;
     }
 
     .composer {
@@ -250,15 +326,33 @@
       align-items: flex-end;
     }
 
+    .mic-btn {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      line-height: 1;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+    }
+
+    .mic-btn.listening {
+      background: var(--danger);
+    }
+
     textarea {
-      min-height: 46px;
-      max-height: 130px;
-      resize: vertical;
+      min-height: 44px;
+      max-height: 110px;
+      resize: none;
     }
 
     .hint {
-      font-size: 0.74rem;
-      color: var(--muted);
+      font-size: 0.75rem;
+      color: #78350f;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -266,16 +360,16 @@
   <header>
     <div class="brand">
       <div class="brand-title">MASTER MIND AI</div>
-      <div class="brand-sub" id="keyBadge">Study &amp; Exam Prep Assistant</div>
+      <div class="brand-sub" id="keyBadge">Smart Study &amp; Exam App</div>
     </div>
     <div class="header-actions">
-      <button class="key-btn" id="clearChatBtn" type="button">नई चैट</button>
-      <button class="key-btn" id="toggleKeyBtn" type="button">🔑 API Key</button>
+      <button class="top-btn" id="clearChatBtn" type="button">नई चैट</button>
+      <button class="top-btn" id="toggleKeyBtn" type="button">🔑 API Key</button>
     </div>
   </header>
 
   <section class="key-panel" id="keyPanel">
-    <div class="hint">अपनी Groq API Key (<code>gsk_...</code>) यहाँ डालें। यह केवल आपके फ़ोन के ब्राउज़र में सुरक्षित सेव रहती है।</div>
+    <div class="hint">अपनी Groq API Key (<code>gsk_...</code>) यहाँ डालें। यह केवल आपके फ़ोन में सेव रहती है।</div>
     <div class="key-row">
       <input type="password" id="apiKeyInput" placeholder="gsk_..." autocomplete="off" />
       <button class="btn" id="saveKeyBtn" type="button">Save</button>
@@ -283,53 +377,50 @@
     </div>
   </section>
 
-  <section class="toolbar">
-    <select id="modeSelect" aria-label="Study Mode">
-      <option value="concept">📘 विषय समझाएं (Concept)</option>
-      <option value="notes">📝 छोटे नोट्स (Short Notes)</option>
-      <option value="mcq">❓ बहुविकल्पीय प्रश्न (MCQ Test)</option>
-      <option value="answer">✍️ परीक्षा उत्तर (Exam Answer)</option>
-    </select>
-    <select id="langSelect" aria-label="Language">
-      <option value="Hindi">भाषा: हिंदी</option>
-      <option value="English">Language: English</option>
-      <option value="Bilingual">द्विभाषी (Hindi + English)</option>
-    </select>
-  </section>
-
-  <div class="model-bar">
+  <section class="controls-wrap">
+    <div class="toolbar">
+      <select id="modeSelect" aria-label="Study Mode">
+        <option value="concept">📘 विषय समझाएं</option>
+        <option value="notes">📝 छोटे नोट्स</option>
+        <option value="mcq">❓ MCQ प्रैक्टिस</option>
+        <option value="answer">✍️ परीक्षा उत्तर</option>
+      </select>
+      <select id="langSelect" aria-label="Language">
+        <option value="Hindi">भाषा: हिंदी</option>
+        <option value="English">Language: English</option>
+        <option value="Bilingual">द्विभाषी (Hindi + Eng)</option>
+      </select>
+    </div>
     <select id="modelSelect" aria-label="AI Model">
       <option value="llama-3.1-8b-instant">⚡ मॉडल: llama-3.1-8b-instant</option>
       <option value="llama-3.3-70b-versatile">🧠 मॉडल: llama-3.3-70b-versatile</option>
       <option value="gemma2-9b-it">🔹 मॉडल: gemma2-9b-it</option>
       <option value="mixtral-8x7b-32768">🔸 मॉडल: mixtral-8x7b-32768</option>
     </select>
-  </div>
+  </section>
 
   <div class="chips" id="quickChips">
-    <button class="chip" data-prompt="भारतीय संविधान की प्रस्तावना को सरल बिंदुओं में समझाइए।">संविधान प्रस्तावना</button>
-    <button class="chip" data-prompt="सामान्य ज्ञान के 5 महत्वपूर्ण प्रश्न और उत्तर बनाइए।">5 GK प्रश्न</button>
-    <button class="chip" data-prompt="आज के विषय पर 5 बहुविकल्पीय प्रश्न (MCQ) उत्तर सहित दीजिए।">MCQ प्रैक्टिस</button>
-    <button class="chip" data-prompt="किसी भी विषय को जल्दी याद करने के 4 प्रभावी नियम बताइए।">याद करने के नियम</button>
+    <button class="chip" type="button" data-prompt="भारतीय संविधान की प्रस्तावना को सरल बिंदुओं में समझाइए।">संविधान प्रस्तावना</button>
+    <button class="chip" type="button" data-prompt="सामान्य ज्ञान के 5 महत्वपूर्ण प्रश्न और उत्तर बनाइए।">5 GK प्रश्न</button>
+    <button class="chip" type="button" data-prompt="आज के विषय पर 5 बहुविकल्पीय प्रश्न (MCQ) उत्तर सहित दीजिए।">MCQ प्रैक्टिस</button>
+    <button class="chip" type="button" data-prompt="किसी भी विषय को जल्दी याद करने के 4 प्रभावी नियम बताइए।">याद करने के नियम</button>
   </div>
 
-  <main id="chatBox">
-    <div class="msg-wrap ai">
-      <div class="msg ai">नमस्ते! मैं <b>MASTER MIND ARTIFICIAL INTELLIGENCE</b> हूँ। पढ़ाई, परीक्षा की तैयारी, नोट्स या अभ्यास प्रश्नों के लिए ऊपर 🔑 से अपनी Groq API Key सेव करें और नीचे अपना प्रश्न लिखें।</div>
-    </div>
-  </main>
+  <main id="chatBox"></main>
 
   <footer>
     <div class="status" id="statusText"></div>
     <div class="composer">
-      <textarea id="promptInput" placeholder="यहाँ अपना प्रश्न या विषय लिखें..."></textarea>
+      <button class="mic-btn" id="micBtn" type="button" title="बोलकर लिखें" aria-label="बोलकर लिखें">🎙️</button>
+      <textarea id="promptInput" placeholder="यहाँ लिखें या 🎙️ बोलें..."></textarea>
       <button class="btn" id="sendBtn" type="button">भेजें ➤</button>
     </div>
   </footer>
 
   <script>
-    const STORAGE_KEY = "mastermind_groq_api_key_v1";
-    const MODEL_STORAGE_KEY = "mastermind_groq_model_v1";
+    const KEY_STORAGE = "mastermind_groq_api_key_v2";
+    const MODEL_STORAGE = "mastermind_groq_model_v2";
+    const CHAT_STORAGE = "mastermind_chat_history_v2";
     const FALLBACK_MODELS = [
       "llama-3.1-8b-instant",
       "llama-3.3-70b-versatile",
@@ -347,4 +438,57 @@
     const modeSelect = document.getElementById("modeSelect");
     const langSelect = document.getElementById("langSelect");
     const modelSelect = document.getElementById("modelSelect");
-    const chatBox = document.
+    const chatBox = document.getElementById("chatBox");
+    const promptInput = document.getElementById("promptInput");
+    const micBtn = document.getElementById("micBtn");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusText = document.getElementById("statusText");
+    const quickChips = document.getElementById("quickChips");
+
+    let history = [];
+    let recognition = null;
+    let isListening = false;
+
+    function speakText(text) {
+      if (!("speechSynthesis" in window)) {
+        statusText.textContent = "इस फ़ोन में बोलकर सुनाने की सुविधा उपलब्ध नहीं है।";
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text.slice(0, 1200));
+      utter.lang = langSelect.value === "English" ? "en-IN" : "hi-IN";
+      utter.rate = 1.0;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function addAiActions(wrap, text) {
+      const actions = document.createElement("div");
+      actions.className = "msg-actions";
+
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "action-chip";
+      copyBtn.textContent = "📋 कॉपी करें";
+      copyBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          copyBtn.textContent = "✅ कॉपी हो गया";
+          setTimeout(() => { copyBtn.textContent = "📋 कॉपी करें"; }, 1700);
+        } catch {
+          statusText.textContent = "कॉपी नहीं हो सका।";
+        }
+      });
+
+      const speakBtn = document.createElement("button");
+      speakBtn.type = "button";
+      speakBtn.className = "action-chip";
+      speakBtn.textContent = "🔊 सुनें";
+      speakBtn.addEventListener("click", () => speakText(text));
+
+      actions.appendChild(copyBtn);
+      actions.appendChild(speakBtn);
+      wrap.appendChild(actions);
+    }
+
+    function appendMessage(role, text, withActions = false) {
+      const
